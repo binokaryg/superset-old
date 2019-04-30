@@ -1555,6 +1555,72 @@ class DistributionBarViz(DistributionPieViz):
             chart_data.append(d)
         return chart_data
 
+class DistributionBar2Viz(DistributionPieViz):
+
+    """A good new bar chart"""
+
+    viz_type = 'dist_bar2'
+    verbose_name = _('Distribution - Bar Chart 2')
+    is_timeseries = False
+
+    def query_obj(self):
+        d = super(DistributionBar2Viz, self).query_obj()  # noqa
+        fd = self.form_data
+        if (
+            len(d['groupby']) <
+            len(fd.get('groupby') or []) + len(fd.get('columns') or [])
+        ):
+            raise Exception(
+                _("Can't have overlap between Series and Breakdowns"))
+        if not fd.get('metrics'):
+            raise Exception(_('Pick at least one metric'))
+        if not fd.get('groupby'):
+            raise Exception(_('Pick at least one field for [Series]'))
+        return d
+
+    def get_data(self, df):
+        fd = self.form_data
+        metrics = self.metric_labels
+
+        row = df.groupby(self.groupby).sum()[metrics[0]].copy()
+        row.sort_values(ascending=False, inplace=True)
+        columns = fd.get('columns') or []
+        pt = df.pivot_table(
+            index=self.groupby,
+            columns=columns,
+            values=metrics)
+        if fd.get('contribution'):
+            pt = pt.fillna(0)
+            pt = pt.T
+            pt = (pt / pt.sum()).T
+        pt = pt.reindex(row.index)
+        chart_data = []
+        for name, ys in pt.items():
+            if pt[name].dtype.kind not in 'biufc' or name in self.groupby:
+                continue
+            if isinstance(name, string_types):
+                series_title = name
+            else:
+                offset = 0 if len(metrics) > 1 else 1
+                series_title = ', '.join([text_type(s) for s in name[offset:]])
+            values = []
+            for i, v in ys.items():
+                x = i
+                if isinstance(x, (tuple, list)):
+                    x = ', '.join([text_type(s) for s in x])
+                else:
+                    x = text_type(x)
+                values.append({
+                    'x': x,
+                    'y': v,
+                })
+            d = {
+                'key': series_title,
+                'values': values,
+            }
+            chart_data.append(d)
+        return chart_data
+
 
 class SunburstViz(BaseViz):
 

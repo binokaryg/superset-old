@@ -14,6 +14,7 @@ export const VIZ_TYPES = {
   directed_force: 'directed_force',
   chord: 'chord',
   dist_bar: 'dist_bar',
+  dist_bar2: 'dist_bar2',
   filter_box: 'filter_box',
   heatmap: 'heatmap',
   histogram: 'histogram',
@@ -78,6 +79,7 @@ const vizMap = {
     loadVis(import(/* webpackChunkName: "directed_force" */ './directed_force.js')),
   [VIZ_TYPES.chord]: () => loadVis(import(/* webpackChunkName: "chord" */ './chord.jsx')),
   [VIZ_TYPES.dist_bar]: loadNvd3,
+  [VIZ_TYPES.dist_bar2]: loadNvd3,
   [VIZ_TYPES.filter_box]: () =>
     loadVis(import(/* webpackChunkName: "filter_box" */ './filter_box.jsx')),
   [VIZ_TYPES.heatmap]: () => loadVis(import(/* webpackChunkName: "heatmap" */ './heatmap.js')),

@@ -178,7 +178,7 @@ export default function nvd3Vis(slice, payload) {
     let xLabelRotation = 0;
     let staggerLabels = false;
     if (fd.x_ticks_layout === 'auto') {
-      if (['column', 'dist_bar'].indexOf(vizType) >= 0) {
+      if (['column', 'dist_bar', 'dist_bar2'].indexOf(vizType) >= 0) {
         xLabelRotation = 45;
       }
     } else if (fd.x_ticks_layout === 'staggered') {
@@ -251,7 +251,33 @@ export default function nvd3Vis(slice, payload) {
         }
         break;
 
-      case 'dist_bar':
+      case 'dist_bar2':
+        chart = nv.models.multiBarChart()
+        .showControls(fd.show_controls)
+        .reduceXTicks(reduceXTicks)
+        .groupSpacing(0.1); // Distance between each group of bars.
+
+        chart.xAxis.showMaxMin(false);
+
+        stacked = fd.bar_stacked;
+        chart.stacked(stacked);
+        if (fd.order_bars) {
+          data.forEach((d) => {
+            d.values.sort((a, b) => tryNumify(a.x) < tryNumify(b.x) ? -1 : 1);
+          });
+        }
+        if (fd.show_bar_value) {
+          setTimeout(function () {
+            addTotalBarValues(svg, chart, data, stacked, fd.y_axis_format);
+          }, animationTime);
+        }
+        if (!reduceXTicks) {
+          width = barchartWidth();
+        }
+        chart.width(width);
+        break;
+		
+		case 'dist_bar':
         chart = nv.models.multiBarChart()
         .showControls(fd.show_controls)
         .reduceXTicks(reduceXTicks)
@@ -420,7 +446,7 @@ export default function nvd3Vis(slice, payload) {
     if (chart.x2Axis && chart.x2Axis.tickFormat) {
       chart.x2Axis.tickFormat(xAxisFormatter);
     }
-    const isXAxisString = ['dist_bar', 'box_plot'].indexOf(vizType) >= 0;
+    const isXAxisString = ['dist_bar', 'dist_bar2', 'box_plot'].indexOf(vizType) >= 0;
     if (!isXAxisString && chart.xAxis && chart.xAxis.tickFormat) {
       chart.xAxis.tickFormat(xAxisFormatter);
     }
