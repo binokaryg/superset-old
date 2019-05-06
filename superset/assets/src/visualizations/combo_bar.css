@@ -1,0 +1,18 @@
+.combo_bar body {
+    font: 10px sans-serif;
+  }
+   
+.combo_bar  .axis path,
+.combo_bar  .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+  }
+   
+.combo_bar  .bar {
+    fill: steelblue;
+  }
+   
+.combo_bar  .x.axis path {
+    display: none;
+  }

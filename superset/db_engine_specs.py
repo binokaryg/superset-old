@@ -370,7 +370,7 @@ class BaseEngineSpec(object):
         return {}
 
     @classmethod
-    def execute(cls, cursor, query, async=False):
+    def execute(cls, cursor, query, async2=False):
         if cls.arraysize:
             cursor.arraysize = cls.arraysize
         cursor.execute(query)
@@ -1276,8 +1276,8 @@ class HiveEngineSpec(PrestoEngineSpec):
         return configuration
 
     @staticmethod
-    def execute(cursor, query, async=False):
-        cursor.execute(query, async=async)
+    def execute(cursor, query, async2=False):
+        cursor.execute(query, async2=async2)
 
 
 class MssqlEngineSpec(BaseEngineSpec):

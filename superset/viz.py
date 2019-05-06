@@ -1307,7 +1307,7 @@ class NVD3DualLineViz(NVD3Viz):
             raise Exception(_('Pick a metric for right axis!'))
         if m1 == m2:
             raise Exception(_('Please choose different metrics'
-                            ' on left and right axis'))
+                              ' on left and right axis'))
         return d
 
     def to_series(self, df, classed=''):
@@ -1554,6 +1554,7 @@ class DistributionBarViz(DistributionPieViz):
             }
             chart_data.append(d)
         return chart_data
+
 
 class DistributionBar2Viz(DistributionPieViz):
 
@@ -2734,6 +2735,47 @@ class PartitionViz(NVD3TimeSeriesViz):
         else:
             levels = self.levels_for('agg_sum', [DTTM_ALIAS] + groups, df)
         return self.nest_values(levels)
+
+
+class ComboBarViz(BaseViz):
+
+    """Combo Bar"""
+
+    viz_type = 'combo_bar'
+    verbose_name = _('Combo Bar')
+    is_timeseries = False
+
+    def query_obj(self):
+        """Returns the query object for this visualization"""
+        d = super(ComboBarViz, self).query_obj()
+        d['row_limit'] = self.form_data.get(
+            'row_limit', int(config.get('VIZ_ROW_LIMIT')))
+        numeric_columns = self.form_data.get('all_columns_x')
+        if numeric_columns is None:
+            raise Exception(_('Must have at least one numeric column specified'))
+        self.columns = numeric_columns
+        d['columns'] = numeric_columns + self.groupby
+        # override groupby entry to avoid aggregation
+        d['groupby'] = []
+        return d
+
+    def get_data(self, df):
+        """Returns the chart data"""
+        chart_data = []
+        if len(self.groupby) > 0:
+            groups = df.groupby(self.groupby)
+        else:
+            groups = [((), df)]
+        for keys, data in groups:
+            if isinstance(keys, str):
+                keys = (keys,)
+            # removing undesirable characters
+            keys = [re.sub(r'\W+', r'_', k) for k in keys]
+            chart_data.extend([{
+                'key': '__'.join([c] + keys),
+                'values': data[c].tolist()}
+                for c in self.columns])
+        return chart_data
 
 
 viz_types = {
