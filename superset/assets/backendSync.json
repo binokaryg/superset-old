@@ -29,6 +29,20 @@
       "valueKey": "metric_name",
       "description": "Metrics for which percentage of total are to be displayed"
     },
+    "column_1": {
+      "type": "SelectControl",
+      "multi": true,
+      "label": "First Column Metrics",
+      "valueKey": "metric_name",
+      "description": "Metrics to be shown in the first column"
+    },
+    "column_2": {
+      "type": "SelectControl",
+      "multi": true,
+      "label": "Second Column Metrics",
+      "valueKey": "metric_name",
+      "description": "Metrics to be shown in the second column"
+    },
     "y_axis_bounds": {
       "type": "BoundsControl",
       "label": "Y Axis Bounds",

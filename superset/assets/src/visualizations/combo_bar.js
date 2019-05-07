@@ -5,7 +5,8 @@ import { getColorFromScheme } from '../modules/colors';
 require('./combo_bar.css');
 
 function combo_bar(slice, payload) {
-  const data = payload.data;
+  console.log("data", JSON.stringify(payload.data));
+  const data = payload.data.records;
   const div = d3.select(slice.selector);
   //const numBins = Number(slice.formData.link_length) || 10;
   const normalized = slice.formData.normalized;
@@ -42,7 +43,8 @@ function combo_bar(slice, payload) {
     var color = d3.scale.ordinal()
       .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
 
-    var svg = d3.select("svg").append("svg")
+    const container = d3.select(slice.selector);
+    var svg = container.append("svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
@@ -50,11 +52,11 @@ function combo_bar(slice, payload) {
 
     var yBegin;
     var innerColumns = {
-      "column1": ["CC-30", "PC-30"],
-      "column2": ["CC(30-60)", "PC(30-60)"]
+      "column1": payload.data.col1, //["SUM(PC-0-30)", "SUM(PC-30-60)"],
+      "column2": payload.data.col2  //["SUM(CC-0-30)", "SUM(CC-30-60)"]
     }
 
-    var data = [{ 'District': 'Sindhuli', 'CC-30': '1', 'PC-30': '2', 'CC(30-60)': '3', 'PC(30-60)': '4' }, { 'District': 'Kanchanpur', 'CC-30': '4', 'PC-30': '3', 'CC(30-60)': '2', 'PC(30-60)': '2' },];
+    //var data = [{ 'District': 'Sindhuli', 'CC-30': '1', 'PC-30': '2', 'CC(30-60)': '3', 'PC(30-60)': '4' }, { 'District': 'Kanchanpur', 'CC-30': '4', 'PC-30': '3', 'CC(30-60)': '2', 'PC(30-60)': '2' },];
 
     var columnHeaders = d3.keys(data[0]).filter(function (key) { return key !== "District"; });
     color.domain(d3.keys(data[0]).filter(function (key) { return key !== "District"; }));
@@ -76,6 +78,14 @@ function combo_bar(slice, payload) {
         return d.yEnd;
       });
     });
+
+    x0.domain(data.map(function(d) { return d.District; }));
+    x1.domain(d3.keys(innerColumns)).rangeRoundBands([0, x0.rangeBand()]);
+   
+    y.domain([0, d3.max(data, function(d) { 
+      return d.total; 
+    })]);
+   
 
 
     svg.append("g")

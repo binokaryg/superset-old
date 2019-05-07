@@ -1527,41 +1527,50 @@ export const visTypes = {
     label: t('Combo Bar Diagram'),
     controlPanelSections: [
       {
-        label: t('Query'),
+        label: t('GROUP BY'),
+        description: t('Use this section if you want a query that aggregates'),
         expanded: true,
         controlSetRows: [
-          ['all_columns_x'],
-          ['adhoc_filters'],
-          ['row_limit'],
           ['groupby'],
+          ['metrics'],
+          ['percent_metrics'],
+          ['timeseries_limit_metric', 'row_limit'],
+          ['include_time', 'order_desc'],
+          ['column_1'],
+          ['column_2']
         ],
       },
       {
-        label: t('Chart Options'),
+        label: t('NOT GROUPED BY'),
+        description: t('Use this section if you want to query atomic rows'),
         expanded: true,
         controlSetRows: [
-          ['color_scheme'],
-          ['link_length'],
-          ['x_axis_label', 'y_axis_label'],
-          ['global_opacity'],
-          ['normalized'],
+          ['all_columns'],
+          ['order_by_cols'],
+          ['row_limit', null],
+        ],
+      },
+      {
+        label: t('Query'),
+        expanded: true,
+        controlSetRows: [
+          ['adhoc_filters'],
+        ],
+      },
+      {
+        label: t('Options'),
+        expanded: true,
+        controlSetRows: [
+          ['table_timestamp_format'],
+          ['page_length', null],
+          ['include_search', 'table_filter'],
+          ['align_pn', 'color_pn'],
         ],
       },
     ],
     controlOverrides: {
-      all_columns_x: {
-        label: t('Numeric Columns'),
-        description: t('Select the numeric columns to draw the histogram'),
-        multi: true,
-      },
-      link_length: {
-        label: t('No of Bins'),
-        description: t('Select number of bins for the histogram'),
-        default: 5,
-      },
-      global_opacity: {
-        description: t('Opacity of the bars. Between 0 and 1'),
-        renderTrigger: true,
+      metrics: {
+        validators: [],
       },
     },
   },
