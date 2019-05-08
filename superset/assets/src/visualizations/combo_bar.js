@@ -5,7 +5,7 @@ import { getColorFromScheme } from '../modules/colors';
 require('./combo_bar.css');
 
 function combo_bar(slice, payload) {
-  console.log("data", JSON.stringify(payload.data));
+  //console.log("data", JSON.stringify(payload.data));
   const data = payload.data.records;
   const div = d3.select(slice.selector);
   //const numBins = Number(slice.formData.link_length) || 10;
@@ -60,6 +60,7 @@ function combo_bar(slice, payload) {
 
     var columnHeaders = d3.keys(data[0]).filter(function (key) { return key !== "District"; });
     color.domain(d3.keys(data[0]).filter(function (key) { return key !== "District"; }));
+    //console.log('data', data);
     data.forEach(function (d) {
       var yColumn = new Array();
       d.columnDetails = columnHeaders.map(function (name) {
@@ -70,22 +71,29 @@ function combo_bar(slice, payload) {
             }
             yBegin = yColumn[ic];
             yColumn[ic] += +d[name];
+            console.log('2. yEnd', +d[name] + yBegin);
             return { name: name, column: ic, yBegin: yBegin, yEnd: +d[name] + yBegin, };
           }
         }
       });
       d.total = d3.max(d.columnDetails, function (d) {
-        return d.yEnd;
+        if (typeof d === 'undefined') {
+          //console.log("d is undefined");
+        }
+        else {
+          //console.log('d.yEnd', d.yEnd);
+          return d.yEnd;
+        }
       });
     });
 
-    x0.domain(data.map(function(d) { return d.District; }));
+    x0.domain(data.map(function (d) { return d.District; }));
     x1.domain(d3.keys(innerColumns)).rangeRoundBands([0, x0.rangeBand()]);
-   
-    y.domain([0, d3.max(data, function(d) { 
-      return d.total; 
+
+    y.domain([0, d3.max(data, function (d) {
+      return d.total;
     })]);
-   
+
 
 
     svg.append("g")
@@ -114,15 +122,37 @@ function combo_bar(slice, payload) {
       .enter().append("rect")
       .attr("width", x1.rangeBand())
       .attr("x", function (d) {
-        return x1(d.column);
+        if (typeof d === 'undefined') {
+          //console.log('d2 is undefined');
+        }
+        else {
+          return x1(d.column);
+        }
       })
       .attr("y", function (d) {
-        return y(d.yEnd);
+        if (typeof d === 'undefined') {
+          //console.log('d3 is undefined');
+        }
+        else {
+          return y(d.yEnd);
+        }
       })
       .attr("height", function (d) {
-        return y(d.yBegin) - y(d.yEnd);
+        if (typeof d === 'undefined') {
+          //console.log('d4 is undefined');
+        }
+        else {
+          return y(d.yBegin) - y(d.yEnd);
+        }
       })
-      .style("fill", function (d) { return color(d.name); });
+      .style("fill", function (d) {
+        if (typeof d === 'undefined') {
+          //console.log('d5 is undefined');
+        }
+        else {
+          return getColorFromScheme(d.name, slice.formData.color_scheme);
+        }
+      });
 
     var legend = svg.selectAll(".legend")
       .data(columnHeaders.slice().reverse())

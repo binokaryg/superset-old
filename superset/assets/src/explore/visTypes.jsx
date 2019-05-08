@@ -1537,7 +1537,8 @@ export const visTypes = {
           ['timeseries_limit_metric', 'row_limit'],
           ['include_time', 'order_desc'],
           ['column_1'],
-          ['column_2']
+          ['column_2'],
+          ['color_scheme']
         ],
       },
       {
@@ -1561,10 +1562,7 @@ export const visTypes = {
         label: t('Options'),
         expanded: true,
         controlSetRows: [
-          ['table_timestamp_format'],
-          ['page_length', null],
-          ['include_search', 'table_filter'],
-          ['align_pn', 'color_pn'],
+          ['color_scheme'],
         ],
       },
     ],
