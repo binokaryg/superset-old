@@ -1,11 +1,11 @@
 import d3 from 'd3';
-import nv from 'nvd3';
 import { getColorFromScheme } from '../modules/colors';
 
 require('./combo_bar.css');
 
 function combo_bar(slice, payload) {
-  //console.log("data", JSON.stringify(payload.data));
+  console.log("slice", slice);
+  console.log("payload", payload);
   const data = payload.data.records;
   const div = d3.select(slice.selector);
   //const numBins = Number(slice.formData.link_length) || 10;
@@ -40,28 +40,27 @@ function combo_bar(slice, payload) {
       .orient("left")
       .tickFormat(d3.format(".2s"));
 
-    var color = d3.scale.ordinal()
-      .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
-
     const container = d3.select(slice.selector);
     var svg = container.append("svg")
       .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
+      .attr("height", height + margin.top + margin.bottom + 30)
       .append("g")
-      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+      .attr("transform", "translate(" + (margin.left + (yAxisLabel ? 20 : 0)) + "," + margin.top + ")");
 
     var yBegin;
     var innerColumns = {
-      "column1": payload.data.col1, //["SUM(PC-0-30)", "SUM(PC-30-60)"],
-      "column2": payload.data.col2  //["SUM(CC-0-30)", "SUM(CC-30-60)"]
+      "column1": slice.formData.column_1.map((c) => { return c.label }),//payload.data.col1, //["SUM(PC-0-30)", "SUM(PC-30-60)"],
+      "column2": slice.formData.column_2.map((c) => { return c.label })  //["SUM(CC-0-30)", "SUM(CC-30-60)"]
     }
+
+    var groupby = slice.formData.groupby[0];
 
     //var allCols = payload.data.col1.concat(payload.data.col2);
 
     //var data = [{ 'District': 'Sindhuli', 'CC-30': '1', 'PC-30': '2', 'CC(30-60)': '3', 'PC(30-60)': '4' }, { 'District': 'Kanchanpur', 'CC-30': '4', 'PC-30': '3', 'CC(30-60)': '2', 'PC(30-60)': '2' },];
 
-    var columnHeaders = payload.data.col1.concat(payload.data.col2);//d3.keys(data[0]).filter(function (key) { return key !== "District"; });
-    color.domain(d3.keys(data[0]).filter(function (key) { return key !== "District"; }));
+    var columnHeaders = innerColumns.column1.concat(innerColumns.column2);//d3.keys(data[0]).filter(function (key) { return key !== "District"; });
+    //color.domain(d3.keys(data[0]).filter(function (key) { return key !== "District"; }));
     //console.log('data', data);
     data.forEach(function (d) {
       var yColumn = new Array();
@@ -73,7 +72,7 @@ function combo_bar(slice, payload) {
             }
             yBegin = yColumn[ic];
             yColumn[ic] += +d[name];
-            console.log('2. yEnd', +d[name] + yBegin);
+            //console.log('2. yEnd', +d[name] + yBegin);
             return { name: name, column: ic, yBegin: yBegin, yEnd: +d[name] + yBegin, };
           }
         }
@@ -89,7 +88,7 @@ function combo_bar(slice, payload) {
       });
     });
 
-    x0.domain(data.map(function (d) { return d.District; }));
+    x0.domain(data.map(function (d) { return d[groupby]; }));
     x1.domain(d3.keys(innerColumns)).rangeRoundBands([0, x0.rangeBand()]);
 
     y.domain([0, d3.max(data, function (d) {
@@ -112,15 +111,15 @@ function combo_bar(slice, payload) {
       .attr("dy", ".7em")
       .style("text-anchor", "end")
       .text("");
-    console.log('data', data);
+    //console.log('data', data);
     var project_stackedbar = svg.selectAll(".project_stackedbar")
       .data(data)
       .enter().append("g")
       .attr("class", "g")
-      .attr("transform", function (d) { return "translate(" + x0(d.District) + ",0)"; });
+      .attr("transform", function (d) { return "translate(" + x0(d[groupby]) + ",0)"; });
 
     project_stackedbar.selectAll("rect")
-      .data(function (d) {console.log('dcd', d.columnDetails); return d.columnDetails; })
+      .data(function (d) { return d.columnDetails; })
       .enter().append("rect")
       .attr("width", x1.rangeBand())
       .attr("x", function (d) {
@@ -152,7 +151,7 @@ function combo_bar(slice, payload) {
           //console.log('d5 is undefined');
         }
         else {
-          console.log('bar', d, d.name, getColorFromScheme(d.name, slice.formData.color_scheme));
+          //console.log('bar', d, d.name, getColorFromScheme(d.name, slice.formData.color_scheme));
           return getColorFromScheme(d.name, slice.formData.color_scheme);
         }
       });
@@ -172,7 +171,7 @@ function combo_bar(slice, payload) {
           //console.log('d5 is undefined');
         }
         else {
-          console.log('legend', d, getColorFromScheme(d, slice.formData.color_scheme));
+          //console.log('legend', d, getColorFromScheme(d, slice.formData.color_scheme));
           return getColorFromScheme(d, slice.formData.color_scheme);
         }
       });
@@ -183,10 +182,28 @@ function combo_bar(slice, payload) {
       .attr("dy", ".35em")
       .style("text-anchor", "end")
       .text(function (d) { return d; });
-  };
 
+    // add axis labels if passed
+    if (xAxisLabel) {
+      svg.append('text')
+        .attr('transform',
+          'translate(' + ((width + margin.left) / 2) + ' ,' +
+          (height + margin.top + 40) + ')')
+        .style('text-anchor', 'middle')
+        .text(xAxisLabel);
+    }
+    if (yAxisLabel) {
+      svg.append('text')
+        .attr('transform', 'rotate(-90)')
+        .attr('y', '-4em')
+        .attr('x', 0 - (height / 2))
+        .attr('dy', '1em')
+        .style('text-anchor', 'middle')
+        .text(yAxisLabel);
+    }
+  };
   div.selectAll('*').remove();
   draw();
-}
+};
 
 module.exports = combo_bar;

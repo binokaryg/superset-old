@@ -64,8 +64,8 @@ export const sections = {
     {
       label: t('Advanced Analytics'),
       description: t('This section contains options ' +
-      'that allow for advanced analytical post processing ' +
-      'of query results'),
+        'that allow for advanced analytical post processing ' +
+        'of query results'),
       controlSetRows: [
         [<h1 className="section-header">{t('Moving Average')}</h1>],
         ['rolling_type', 'rolling_periods', 'min_periods'],
@@ -1082,10 +1082,10 @@ export const visTypes = {
     controlOverrides: {
       code: {
         default: '####Section Title\n' +
-        'A paragraph describing the section' +
-        'of the dashboard, right before the separator line ' +
-        '\n\n' +
-        '---------------',
+          'A paragraph describing the section' +
+          'of the dashboard, right before the separator line ' +
+          '\n\n' +
+          '---------------',
       },
     },
   },
@@ -1414,8 +1414,8 @@ export const visTypes = {
         label: t('Secondary Metric'),
         default: null,
         description: t('[optional] this secondary metric is used to ' +
-        'define the color as a ratio against the primary metric. ' +
-        'When omitted, the color is categorical and based on labels'),
+          'define the color as a ratio against the primary metric. ' +
+          'When omitted, the color is categorical and based on labels'),
       },
       groupby: {
         label: t('Hierarchy'),
@@ -1563,8 +1563,17 @@ export const visTypes = {
         expanded: true,
         controlSetRows: [
           ['color_scheme'],
+          ['show_bar_value', 'order_bars'],
+          ['y_axis_format', 'y_axis_label']
         ],
       },
+      {
+        label: t('X Axis'),
+        expanded: true,
+        controlSetRows: [
+          ['x_axis_label', 'bottom_margin']
+        ],
+      }
     ],
     controlOverrides: {
       metrics: {
