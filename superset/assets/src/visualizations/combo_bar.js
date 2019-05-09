@@ -56,9 +56,11 @@ function combo_bar(slice, payload) {
       "column2": payload.data.col2  //["SUM(CC-0-30)", "SUM(CC-30-60)"]
     }
 
+    //var allCols = payload.data.col1.concat(payload.data.col2);
+
     //var data = [{ 'District': 'Sindhuli', 'CC-30': '1', 'PC-30': '2', 'CC(30-60)': '3', 'PC(30-60)': '4' }, { 'District': 'Kanchanpur', 'CC-30': '4', 'PC-30': '3', 'CC(30-60)': '2', 'PC(30-60)': '2' },];
 
-    var columnHeaders = d3.keys(data[0]).filter(function (key) { return key !== "District"; });
+    var columnHeaders = payload.data.col1.concat(payload.data.col2);//d3.keys(data[0]).filter(function (key) { return key !== "District"; });
     color.domain(d3.keys(data[0]).filter(function (key) { return key !== "District"; }));
     //console.log('data', data);
     data.forEach(function (d) {
@@ -110,7 +112,7 @@ function combo_bar(slice, payload) {
       .attr("dy", ".7em")
       .style("text-anchor", "end")
       .text("");
-
+    console.log('data', data);
     var project_stackedbar = svg.selectAll(".project_stackedbar")
       .data(data)
       .enter().append("g")
@@ -118,7 +120,7 @@ function combo_bar(slice, payload) {
       .attr("transform", function (d) { return "translate(" + x0(d.District) + ",0)"; });
 
     project_stackedbar.selectAll("rect")
-      .data(function (d) { return d.columnDetails; })
+      .data(function (d) {console.log('dcd', d.columnDetails); return d.columnDetails; })
       .enter().append("rect")
       .attr("width", x1.rangeBand())
       .attr("x", function (d) {
@@ -150,6 +152,7 @@ function combo_bar(slice, payload) {
           //console.log('d5 is undefined');
         }
         else {
+          console.log('bar', d, d.name, getColorFromScheme(d.name, slice.formData.color_scheme));
           return getColorFromScheme(d.name, slice.formData.color_scheme);
         }
       });
@@ -164,7 +167,15 @@ function combo_bar(slice, payload) {
       .attr("x", width - 18)
       .attr("width", 18)
       .attr("height", 18)
-      .style("fill", color);
+      .style("fill", function (d) {
+        if (typeof d === 'undefined') {
+          //console.log('d5 is undefined');
+        }
+        else {
+          console.log('legend', d, getColorFromScheme(d, slice.formData.color_scheme));
+          return getColorFromScheme(d, slice.formData.color_scheme);
+        }
+      });
 
     legend.append("text")
       .attr("x", width - 24)
