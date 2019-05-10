@@ -1532,23 +1532,9 @@ export const visTypes = {
         expanded: true,
         controlSetRows: [
           ['groupby'],
-          ['metrics'],
-          ['percent_metrics'],
-          ['timeseries_limit_metric', 'row_limit'],
-          ['include_time', 'order_desc'],
           ['column_1'],
           ['column_2'],
-          ['color_scheme']
-        ],
-      },
-      {
-        label: t('NOT GROUPED BY'),
-        description: t('Use this section if you want to query atomic rows'),
-        expanded: true,
-        controlSetRows: [
-          ['all_columns'],
-          ['order_by_cols'],
-          ['row_limit', null],
+          ['row_limit', 'order_desc'],
         ],
       },
       {
@@ -1990,7 +1976,7 @@ export function sectionsToRender(vizType, datasourceType) {
       }
     });
   }
-
+  
   return [].concat(
     sectionsCopy.datasourceAndVizType,
     datasourceType === 'table' ? sectionsCopy.sqlaTimeSeries : sectionsCopy.druidTimeSeries,

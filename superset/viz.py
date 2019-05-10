@@ -2762,95 +2762,20 @@ class ComboBarViz(BaseViz):
     def query_obj(self):
         d = super(ComboBarViz, self).query_obj()
         fd = self.form_data
-
-        if fd.get('all_columns') and (fd.get('groupby') or fd.get('metrics')):
-            raise Exception(_(
-                'Choose either fields to [Group By] and [Metrics] or '
-                '[Columns], not both'))
-
-        sort_by = fd.get('timeseries_limit_metric')
-        if fd.get('all_columns'):
-            d['columns'] = fd.get('all_columns')
-            d['groupby'] = []
-            order_by_cols = fd.get('order_by_cols') or []
-            d['orderby'] = [json.loads(t) for t in order_by_cols]
-        elif sort_by:
-            sort_by_label = utils.get_metric_name(sort_by)
-            if sort_by_label not in utils.get_metric_names(d['metrics']):
-                d['metrics'] += [sort_by]
-            d['orderby'] = [(sort_by, not fd.get('order_desc', True))]
-
-        # Add all percent metrics that are not already in the list
-        if 'percent_metrics' in fd:
-            d['metrics'] = d['metrics'] + list(filter(
-                lambda m: m not in d['metrics'],
-                fd['percent_metrics'] or [],
-            ))
-
-        d['is_timeseries'] = self.should_be_timeseries()
+        d['metrics'] = fd.get('column_1') + fd.get('column_2')
+        # print("myfilters1", d['filter'])
         return d
 
     def get_data(self, df):
-        fd = self.form_data
-        if (
-                not self.should_be_timeseries() and
-                df is not None and
-                DTTM_ALIAS in df
-        ):
-            del df[DTTM_ALIAS]
-
-        # Sum up and compute percentages for all percent metrics
-        percent_metrics = fd.get('percent_metrics') or []
-        percent_metrics = [self.get_metric_label(m) for m in percent_metrics]
-
-        if len(percent_metrics):
-            percent_metrics = list(filter(lambda m: m in df, percent_metrics))
-            metric_sums = {
-                m: reduce(lambda a, b: a + b, df[m])
-                for m in percent_metrics
-            }
-            metric_percents = {
-                m: list(map(
-                    lambda a: None if metric_sums[m] == 0 else a / metric_sums[m], df[m]))
-                for m in percent_metrics
-            }
-            for m in percent_metrics:
-                m_name = '%' + m
-                df[m_name] = pd.Series(metric_percents[m], name=m_name)
-            # Remove metrics that are not in the main metrics list
-            metrics = fd.get('metrics') or []
-            metrics = [self.get_metric_label(m) for m in metrics]
-            for m in filter(
-                lambda m: m not in metrics and m in df.columns,
-                percent_metrics,
-            ):
-                del df[m]
-
         data = self.handle_js_int_overflow(
             dict(
                 records=df.to_dict(orient='records'),
                 columns=list(df.columns),
             ))
-
-        column_1 = fd.get('column_1') or []
-        column_1 = [self.get_metric_label(m) for m in column_1]
-        column_2 = fd.get('column_2') or []
-        column_2 = [self.get_metric_label(m) for m in column_2]
-        if len(column_1):
-            data['col1'] = column_1
-        if len(column_2):
-            data['col2'] = column_2
         return data
 
     def json_dumps(self, obj, sort_keys=False):
-        if self.form_data.get('all_columns'):
-            return json.dumps(
-                obj,
-                default=utils.json_iso_dttm_ser,
-                sort_keys=sort_keys,
-                ignore_nan=True)
-        else:
-            return super(ComboBarViz, self).json_dumps(obj)
+        return super(ComboBarViz, self).json_dumps(obj)
 
 
 viz_types = {
