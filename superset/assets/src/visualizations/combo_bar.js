@@ -1,5 +1,6 @@
 import d3 from 'd3';
 import { getColorFromScheme } from '../modules/colors';
+import { customizeToolTip, d3TimeFormatPreset, d3FormatPreset, tryNumify } from '../modules/utils';
 
 require('./combo_bar.css');
 
@@ -38,10 +39,11 @@ function combo_bar(slice, payload) {
     var yAxis = d3.svg.axis()
       .scale(y)
       .orient("left")
-      .tickFormat(d3.format(".2s"));
+      .tickFormat(d3FormatPreset(slice.formData.y_axis_format));
 
     const container = d3.select(slice.selector);
     var svg = container.append("svg")
+      .attr("id", "svgComboBar")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom + 30)
       .append("g")
@@ -54,7 +56,7 @@ function combo_bar(slice, payload) {
     }
 
     var groupby = slice.formData.groupby[0];
-
+    var tooltip = container.append("div").attr("class", "toolTip");
     //var allCols = payload.data.col1.concat(payload.data.col2);
 
     //var data = [{ 'District': 'Sindhuli', 'CC-30': '1', 'PC-30': '2', 'CC(30-60)': '3', 'PC(30-60)': '4' }, { 'District': 'Kanchanpur', 'CC-30': '4', 'PC-30': '3', 'CC(30-60)': '2', 'PC(30-60)': '2' },];
@@ -154,7 +156,37 @@ function combo_bar(slice, payload) {
           //console.log('bar', d, d.name, getColorFromScheme(d.name, slice.formData.color_scheme));
           return getColorFromScheme(d.name, slice.formData.color_scheme);
         }
-      });
+      })
+      .on("mousemove", function (d) {
+        console.log(d);
+        tooltip
+          .style("left", (d3.event.pageX - document.getElementById('svgComboBar').getBoundingClientRect().x + margin.left) + "px")
+          .style("top", (d3.event.pageY - document.getElementById('svgComboBar').getBoundingClientRect().y) - margin.top + "px")
+            .style("display", "inline-block")
+            .html("<span class='label'>" + d.name + ":</span><br><span class='value'>" + (d.yEnd - d.yBegin) + "</span>");
+      })
+      .on("mouseout", function (d) {
+        tooltip.style("display", "none");
+      })
+
+    //Bar Values
+    if (slice.formData.show_bar_value) {
+      project_stackedbar.selectAll()
+        .data(function (d) { return d.columnDetails; })
+        .enter()
+        .append("text")
+        .attr("class", "label")
+        .attr("x", function (d) {
+          return x1(d.column) + x0.rangeBand() / 4;
+        })
+        .attr("y", function (d) {
+          return y(d.yEnd) + 1;
+        })
+        .attr("dy", ".75em")
+        .text(function (d) {
+          return d.yEnd - d.yBegin;
+        });
+    }
 
     var legend = svg.selectAll(".legend")
       .data(columnHeaders.slice().reverse())
