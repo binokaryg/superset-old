@@ -5,8 +5,8 @@ import { customizeToolTip, d3TimeFormatPreset, d3FormatPreset, tryNumify } from 
 require('./combo_bar.css');
 
 function combo_bar(slice, payload) {
-  console.log("slice", slice);
-  console.log("payload", payload);
+  //console.log("slice", slice);
+  //console.log("payload", payload);
   const data = payload.data.records;
   const div = d3.select(slice.selector);
   //const numBins = Number(slice.formData.link_length) || 10;
@@ -114,14 +114,14 @@ function combo_bar(slice, payload) {
       .style("text-anchor", "end")
       .text("");
     //console.log('data', data);
-    var project_stackedbar = svg.selectAll(".project_stackedbar")
+    var project_stackedbar = svg.selectAll()
       .data(data)
       .enter().append("g")
       .attr("class", "g")
       .attr("transform", function (d) { return "translate(" + x0(d[groupby]) + ",0)"; });
 
     project_stackedbar.selectAll("rect")
-      .data(function (d) { return d.columnDetails; })
+      .data(function (d) {d.columnDetails.forEach(function (el) { el.group = d[groupby] }); return d.columnDetails; })
       .enter().append("rect")
       .attr("width", x1.rangeBand())
       .attr("x", function (d) {
@@ -158,12 +158,11 @@ function combo_bar(slice, payload) {
         }
       })
       .on("mousemove", function (d) {
-        console.log(d);
         tooltip
           .style("left", (d3.event.pageX - document.getElementById('svgComboBar').getBoundingClientRect().x + margin.left) + "px")
           .style("top", (d3.event.pageY - document.getElementById('svgComboBar').getBoundingClientRect().y) - margin.top + "px")
             .style("display", "inline-block")
-            .html("<span class='label'>" + d.name + ":</span><br><span class='value'>" + (d.yEnd - d.yBegin) + "</span>");
+            .html("<span class='label'>" + d.group + "<br>" + d.name + ":</span><br><span class='value'>" + (d.yEnd - d.yBegin) + "</span>");
       })
       .on("mouseout", function (d) {
         tooltip.style("display", "none");
