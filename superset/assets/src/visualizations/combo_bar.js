@@ -57,6 +57,11 @@ function combo_bar(slice, payload) {
 
     var groupby = slice.formData.groupby[0];
     var tooltip = container.append("div").attr("class", "toolTip");
+    if (slice.formData.order_bars) {
+      data.forEach((d) => {
+        d.values.sort((a, b) => tryNumify(a.x) < tryNumify(b.x) ? -1 : 1);
+      });
+    }
     //var allCols = payload.data.col1.concat(payload.data.col2);
 
     //var data = [{ 'District': 'Sindhuli', 'CC-30': '1', 'PC-30': '2', 'CC(30-60)': '3', 'PC(30-60)': '4' }, { 'District': 'Kanchanpur', 'CC-30': '4', 'PC-30': '3', 'CC(30-60)': '2', 'PC(30-60)': '2' },];
@@ -121,7 +126,7 @@ function combo_bar(slice, payload) {
       .attr("transform", function (d) { return "translate(" + x0(d[groupby]) + ",0)"; });
 
     project_stackedbar.selectAll("rect")
-      .data(function (d) {d.columnDetails.forEach(function (el) { el.group = d[groupby] }); return d.columnDetails; })
+      .data(function (d) { d.columnDetails.forEach(function (el) { el.group = d[groupby] }); return d.columnDetails; })
       .enter().append("rect")
       .attr("width", x1.rangeBand())
       .attr("x", function (d) {
@@ -161,8 +166,8 @@ function combo_bar(slice, payload) {
         tooltip
           .style("left", (d3.event.pageX - document.getElementById('svgComboBar').getBoundingClientRect().x + margin.left) + "px")
           .style("top", (d3.event.pageY - document.getElementById('svgComboBar').getBoundingClientRect().y) - margin.top + "px")
-            .style("display", "inline-block")
-            .html("<span class='label'>" + d.group + "<br>" + d.name + ":</span><br><span class='value'>" + (d.yEnd - d.yBegin) + "</span>");
+          .style("display", "inline-block")
+          .html("<span class='label'>" + d.group + "<br>" + d.name + ":</span><br><span class='value'>" + (d.yEnd - d.yBegin) + "</span>");
       })
       .on("mouseout", function (d) {
         tooltip.style("display", "none");
@@ -187,14 +192,28 @@ function combo_bar(slice, payload) {
         });
     }
 
-    var legend = svg.selectAll(".legend")
+    const legend_x = 0;//slice.formData.legend_pos_x;
+    const legend_y = 0;//slice.formData.legend_pos_y;
+
+    //Top Right - Inner
+     var legendX = width - 24 + legend_x;
+     var legendY = 9 + legend_y;
+
+
+    var legendContainer = svg.append("g")
+      .attr("class", "legendContainer")
+      //.attr("x", width - 24)
+      //.attr("y", 9)
+      .attr("transform", "translate(" + legendX + ", " + legendY + ")");
+
+    var legend = legendContainer.selectAll(".legend")
       .data(columnHeaders.slice().reverse())
       .enter().append("g")
       .attr("class", "legend")
       .attr("transform", function (d, i) { return "translate(0," + i * 20 + ")"; });
 
     legend.append("rect")
-      .attr("x", width - 18)
+      .attr("x", 6)
       .attr("width", 18)
       .attr("height", 18)
       .style("fill", function (d) {
@@ -208,7 +227,7 @@ function combo_bar(slice, payload) {
       });
 
     legend.append("text")
-      .attr("x", width - 24)
+      .attr("x", 0)
       .attr("y", 9)
       .attr("dy", ".35em")
       .style("text-anchor", "end")
