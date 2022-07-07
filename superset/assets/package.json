@@ -75,7 +75,7 @@
     "luma.gl": "^5.1.4",
     "mapbox-gl": "^0.45.0",
     "mathjs": "^7.5.1",
-    "moment": "^2.20.1",
+    "moment": "^2.29.4",
     "mousetrap": "^1.6.1",
     "mustache": "^2.2.1",
     "nvd3": "1.8.6",
