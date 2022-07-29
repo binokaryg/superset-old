@@ -63,7 +63,7 @@ setup(
         'contextlib2',
         'cryptography',
         'flask<1.0.0',
-        'flask-appbuilder==3.4.4',  # known db migration with 1.11+
+        'flask-appbuilder==4.1.3',  # known db migration with 1.11+
         'flask-caching',
         'flask-compress',
         'flask-migrate',
